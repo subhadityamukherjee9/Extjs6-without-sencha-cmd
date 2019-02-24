@@ -14,22 +14,31 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/ext-all-debug.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-triton/resources/theme-triton-all-debug.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/extjs/6.2.0/classic/theme-triton/theme-triton-debug.js"></script>
-	<script type="text/javascript">
+    
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    
+    <script type="text/javascript">
         // create store
         Ext.create('Ext.data.Store', {
             storeId: 'customerStoreId',
             pageSize: 10,
+            autoLoad: true,
             fields:[
                 {name: 'id', type: 'int'},
                 {name: 'name', type: 'string'},
                 {name: 'phone', type: 'string'},
                 {name: 'address', type: 'string'}
             ],
-            data: [
-                {id: 1, name: 'Makara', phone: '1111111', address: 'Phnom Penh'},
-                {id: 2, name: 'Dara', phone: '222222', address: 'Kandal'},
-                {id: 3, name: 'Bora', phone: '222222', address: 'Prey Veng'}
-            ]
+            proxy: {
+                type: 'ajax',
+                url: 'data.json',
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    totalProperty: 'total'
+                }
+            }
+            
         });
 
         // Create First Application
@@ -44,11 +53,28 @@
                     height: 300,
                     width: 600,
                     frame: true,
+                    actions: {
+                        delete: {
+                            iconCls: 'x-fa fa-trash-o red',
+                            tooltip: 'Delete'
+                        },
+                        edit: {
+                            iconCls: 'x-fa fa-pencil-square blue',
+                            tooltip: 'Edit'
+                        }
+                    },
                     columns: [
                         {text: 'ID', dataIndex: 'id', flex: 1},
                         {text: 'Name', dataIndex: 'name', flex: 1},
                         {text: 'Phone', dataIndex: 'phone', flex: 1},
-                        {text: 'Address', dataIndex: 'address', flex: 1}
+                        {text: 'Address', dataIndex: 'address', flex: 1},
+                        {
+                            width: 70,
+                            sortable: false,
+                            menuDisabled: true,
+                            xtype: 'actioncolumn',
+                            items: ['@delete', '@edit']
+                        }
                     ],
                     renderTo: Ext.getBody(),
                     //Add Pagination toolbar, Paging not working yet, this just sample
@@ -57,7 +83,24 @@
                         displayInfo: true,
                         displayMsg: 'Display records {0} - {1} of {2}',
                         emptyMsg: 'No Record to display'
-                    }
+                    },
+                    tbar: [
+                        {
+                            xtype: 'textfield',
+                            emptyText: 'Search...',
+                            width: 200
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Search',
+                            iconCls: 'x-fa fa-search blue'
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Refresh',
+                            iconCls: 'x-fa fa-refresh blue'
+                        }
+                    ]
                 });
 
             }
