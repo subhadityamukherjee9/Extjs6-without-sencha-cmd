@@ -41,12 +41,53 @@
             
         });
 
+        //controller
+        Ext.define('CustomerController', {
+            extend: 'Ext.app.ViewController',
+            alias: 'controller.customercontroller',
+            init: function(application){
+                this.control({
+                    "#customerGridId": {
+                        itemdblclick: this.griditemdbdclick
+                    }
+                });
+            },
+            seachHandler: function(btn){
+                var searchText = this.lookupReference('searchText');
+                alert(searchText.getValue());
+            },
+            onSearchTextHandler: function(obj, e, oPts){
+                if(e.getKey() == e.ENTER){
+                    var searchButton = Ext.getCmp('customerGridId').lookupReference('searchButton');
+                    searchButton.click();
+                }
+            },
+            resetHandler: function(btn){
+                var searchInput = Ext.getCmp('customerGridId').lookupReference('searchText');
+                searchInput.setValue('');
+            },
+            griditemdbdclick: function(dv, record, item, index, e){
+                console.log(record);
+                var name = record.get("name");
+                alert(name);
+            },
+            onDeleteHandler: function(grid, rowIndex, colIndex){
+                var rec = grid.getStore().getAt(rowIndex);
+                Ext.Msg.alert('Delete', rec.get('name'));
+            },
+            onEditHandler: function(grid, rowIndex, colIndex){
+                var rec = grid.getStore().getAt(rowIndex);
+                Ext.Msg.alert('Edit', rec.get('name'));
+            }
+        });
+
         // Create First Application
         Ext.application({
             name: 'Customer',
             launch: function(){
                 //create Grid
                 Ext.create('Ext.grid.Panel', {
+                    controller: 'customercontroller',
                     title: 'Customer list',
                     store: Ext.data.StoreManager.lookup('customerStoreId'), // or use Ext.getStore('customerStoreId')
                     id: 'customerGridId',
@@ -56,11 +97,13 @@
                     actions: {
                         delete: {
                             iconCls: 'x-fa fa-trash-o red',
-                            tooltip: 'Delete'
+                            tooltip: 'Delete',
+                            handler: 'onDeleteHandler'
                         },
                         edit: {
                             iconCls: 'x-fa fa-pencil-square blue',
-                            tooltip: 'Edit'
+                            tooltip: 'Edit',
+                            handler: 'onEditHandler'
                         }
                     },
                     columns: [
@@ -88,17 +131,25 @@
                         {
                             xtype: 'textfield',
                             emptyText: 'Search...',
-                            width: 200
+                            width: 200,
+                            reference: 'searchText',
+                            enableKeyEvents: true,
+                            listeners: {
+                                keyup: 'onSearchTextHandler'
+                            }
                         },
                         {
                             xtype: 'button',
                             text: 'Search',
-                            iconCls: 'x-fa fa-search blue'
+                            iconCls: 'x-fa fa-search blue',
+                            handler: 'seachHandler',
+                            reference: 'searchButton'
                         },
                         {
                             xtype: 'button',
                             text: 'Refresh',
-                            iconCls: 'x-fa fa-refresh blue'
+                            iconCls: 'x-fa fa-refresh blue',
+                            handler: 'resetHandler'
                         }
                     ]
                 });
